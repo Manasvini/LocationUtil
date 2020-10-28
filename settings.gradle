@@ -1,0 +1,2 @@
+include ':app', ':annotationmanager'
+rootProject.name='LocationUtil'
