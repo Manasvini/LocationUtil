@@ -53,7 +53,7 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
         return String.valueOf(execute());
     }
 
-    public String addAnnotations(List<Annotation> annotations){
+    public String addAnnotations(List<AnnotationObject> annotations){
         grpcRunnable = new AddAnnotationsRunnable(annotations);
         return String.valueOf(execute());
     }
@@ -120,15 +120,30 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
 
     }
     private class AddAnnotationsRunnable implements GrpcRunnable{
-        private List<Annotation> mAnnotations;
-        public AddAnnotationsRunnable(List<Annotation> annotations){
+        private List<AnnotationObject> mAnnotations;
+        public AddAnnotationsRunnable(List<AnnotationObject> annotations){
             mAnnotations = annotations;
         }
         @Override
         public String run(LocationManagerBlockingStub blockingStub) throws Exception{
             AddAnnotationsRequest request;
             AddAnnotationsRequest.Builder builder = AddAnnotationsRequest.newBuilder();
-            builder.addAllAnnotations(mAnnotations);
+            List<Annotation> annotations = new ArrayList<>();
+            for(AnnotationObject annotationObject: mAnnotations){
+                Annotation annotation;
+                Annotation.Builder aBuilder = Annotation.newBuilder();
+                aBuilder.setAnnotationtype(annotationObject.getAnnotationType());
+                aBuilder.setName(annotationObject.getAnnotationName());
+                aBuilder.setType(annotationObject.getAnnotationValueType());
+                aBuilder.setValue(annotationObject.getAnnotationValue());
+                Point.Builder pb = Point.newBuilder();
+                pb.setLatitude(annotationObject.getLatLong().getLatitude());
+                pb.setLongitude(annotationObject.getLatLong().getLongitude());
+                aBuilder.setLocation(pb.build());
+                annotation = aBuilder.build();
+                annotations.add(annotation);
+            }
+            builder.addAllAnnotations(annotations);
             request = builder.build();
             AddAnnotationsResponse response =  blockingStub.addAnnotations(request);
             return  response.getStatus();
