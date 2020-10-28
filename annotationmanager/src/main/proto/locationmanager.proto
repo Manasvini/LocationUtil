@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "epl.location.locationmanager";
+option java_outer_classname = "LocationManagerProto";
+option objc_class_prefix = "RTG";
+
+package locationmanager;
+
+// Interface exported by the server.
+service LocationManager {
+    // A simple RPC.
+    //
+    rpc GetAnnotations(GetAnnotationsRequest) returns (stream GetAnnotationsResponse) {}
+
+    rpc AddAnnotations(AddAnnotationsRequest) returns (AddAnnotationsResponse) {}
+
+
+}
+
+message Point {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+enum AnnotationValueType{
+    STRING = 0;
+    INT = 1;
+    DOUBLE = 2;
+}
+
+// An annotation has a name, value and type.
+message Annotation {
+    string name = 1;
+    string annotationtype = 2;
+    int32 type = 3;
+    string value = 4;
+    // The point where the feature is detected.
+    Point location = 5;
+}
+
+
+message AddAnnotationsRequest{
+    repeated Annotation annotations = 1;
+}
+
+message AddAnnotationsResponse{
+    string status = 1;
+}
+
+message GetAnnotationsRequest{
+    repeated string annotationtypes = 1;
+    repeated Point locations = 2;
+    double radius = 3;
+}
+
+message GetAnnotationsResponse{
+    repeated Annotation annotations = 1;
+}
+
