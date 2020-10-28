@@ -41,11 +41,12 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
     private final ManagedChannel mChannel;
 
     String mHost ="";
+    int mPort = 0;
 
-
-    public GrpcClient(String host){
+    public GrpcClient(String host, int port){
         mHost = host;
-        mChannel = ManagedChannelBuilder.forTarget(mHost).usePlaintext().build();
+        mPort = port;
+        mChannel = ManagedChannelBuilder.forAddress(mHost, mPort).usePlaintext().build();
 
     }
     public String getAnnotatedRoute(List<LatLong> latLngs, List<String> annotationNames){
