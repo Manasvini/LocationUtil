@@ -40,12 +40,14 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
     private  GrpcRunnable grpcRunnable;
     private final ManagedChannel mChannel;
 
+    private RequestCompleteCallback mCb;
     String mHost ="";
     int mPort = 0;
 
-    public GrpcClient(String host, int port){
+    public GrpcClient(String host, int port, RequestCompleteCallback cb){
         mHost = host;
         mPort = port;
+        mCb = cb;
         mChannel = ManagedChannelBuilder.forAddress(mHost, mPort).usePlaintext().build();
 
     }
@@ -155,15 +157,17 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
         try{
             Log.i(TAG, "sending req");
             String result = grpcRunnable.run(LocationManagerGrpc.newBlockingStub(mChannel));
-            return result;
+            mCb.onRequestComplete(result);
+            return "SUCCESS";
         }
         catch(Exception e){
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             pw.flush();
-            return  "FAILED";
+
         }
+        return "FAIL";
     }
 
 }
