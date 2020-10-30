@@ -51,14 +51,14 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
         mChannel = ManagedChannelBuilder.forAddress(mHost, mPort).usePlaintext().build();
 
     }
-    public String getAnnotatedRoute(List<LatLong> latLngs, List<String> annotationNames){
+    public void getAnnotatedRoute(List<LatLong> latLngs, List<String> annotationNames){
         grpcRunnable = new GetAnnotationsRunnable(latLngs, annotationNames);
-        return String.valueOf(execute());
+        execute();
     }
 
-    public String addAnnotations(List<AnnotationObject> annotations){
+    public void addAnnotations(List<AnnotationObject> annotations){
         grpcRunnable = new AddAnnotationsRunnable(annotations);
-        return String.valueOf(execute());
+        execute();
     }
 
     private class GetAnnotationsRunnable implements  GrpcRunnable{
@@ -170,4 +170,8 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
         return "FAIL";
     }
 
+    @Override
+    protected void onPostExecute(String result){
+        Log.i(TAG, "status is" + result);
+    }
 }
