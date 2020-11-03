@@ -51,8 +51,8 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
         mChannel = ManagedChannelBuilder.forAddress(mHost, mPort).usePlaintext().build();
 
     }
-    public void getAnnotatedRoute(List<LatLong> latLngs, List<String> annotationNames){
-        grpcRunnable = new GetAnnotationsRunnable(latLngs, annotationNames);
+    public void getAnnotatedRoute(List<LatLong> latLngs, List<String> annotationNames, double radiusKm){
+        grpcRunnable = new GetAnnotationsRunnable(latLngs, annotationNames, radiusKm);
         execute();
     }
 
@@ -64,9 +64,11 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
     private class GetAnnotationsRunnable implements  GrpcRunnable{
         private List<LatLong> mLatLngs;
         private  List<String> mAnnotationNames;
-        public GetAnnotationsRunnable(List<LatLong> latLngs, List<String> annotationNames){
+        double mRadiusKm;
+        public GetAnnotationsRunnable(List<LatLong> latLngs, List<String> annotationNames, double radiusKm){
             mLatLngs = latLngs;
             mAnnotationNames = annotationNames;
+            mRadiusKm = radiusKm;
         }
         @Override
         public String run(LocationManagerBlockingStub blockingStub) throws Exception{
@@ -82,6 +84,7 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
                     builder.addLocations(pb.build());
                 }
                 builder.addAllAnnotationtypes(mAnnotationNames);
+                builder.setRadius(mRadiusKm);
                 request = builder.build();
                 List<AnnotationObject> annotations = new ArrayList<>();
 
