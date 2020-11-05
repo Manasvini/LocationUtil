@@ -16,6 +16,7 @@ import epl.location.locationmanager.Annotation;
 import epl.location.locationmanager.GetAnnotationsRequest;
 import epl.location.locationmanager.GetAnnotationsResponse;
 import epl.location.locationmanager.LocationManagerGrpc;
+import epl.location.locationmanager.NearbyAnnotations;
 import epl.location.locationmanager.Point;
 
 import io.grpc.ManagedChannel;
@@ -86,30 +87,40 @@ public class GrpcClient extends AsyncTask<Void, Void, String> {
                 builder.addAllAnnotationtypes(mAnnotationNames);
                 builder.setRadius(mRadiusKm);
                 request = builder.build();
-                List<AnnotationObject> annotations = new ArrayList<>();
+                List<AnnotationObjectList> nearbyAnnotationObjectsList = new ArrayList<>();
 
                 Iterator<GetAnnotationsResponse> responses = blockingStub.getAnnotations(request);
                 for (Iterator<GetAnnotationsResponse> it = responses; it.hasNext(); ) {
                     GetAnnotationsResponse response = it.next();
 
-                    for(Annotation ann: response.getAnnotationsList()){
-                        AnnotationObject annotationObject = new AnnotationObject();
-                        annotationObject.setAnnotationName(ann.getName());
-                        annotationObject.setAnnotationValue(ann.getValue());
-                        annotationObject.setAnnotationValueType(ann.getType());
-                        annotationObject.setAnnotationType(ann.getAnnotationtype());
-                        LatLong latLong  = new LatLong();
-                        latLong.setLatitude(ann.getLocation().getLatitude());
-                        latLong.setLongitude(ann.getLocation().getLongitude());
-                        annotationObject.setLatLong(latLong);
-                        annotations.add(annotationObject);
+                    for(NearbyAnnotations nearbyAnnotations: response.getNearbyAnnotationsList()) {
+                        AnnotationObjectList annotationObjectList = new AnnotationObjectList();
+                        LatLong referenceLocation = new LatLong();
+                        referenceLocation.setLatitude(nearbyAnnotations.getLocation().getLatitude());
+                        referenceLocation.setLongitude(nearbyAnnotations.getLocation().getLongitude());
+                        annotationObjectList.setLatLong(referenceLocation);
+                        List<AnnotationObject> annotationObjects = new ArrayList<>();
+                        for (Annotation ann : nearbyAnnotations.getAnnotationsList()) {
+                            AnnotationObject annotationObject = new AnnotationObject();
+                            annotationObject.setAnnotationName(ann.getName());
+                            annotationObject.setAnnotationValue(ann.getValue());
+                            annotationObject.setAnnotationValueType(ann.getType());
+                            annotationObject.setAnnotationType(ann.getAnnotationtype());
+                            LatLong latLong = new LatLong();
+                            latLong.setLatitude(ann.getLocation().getLatitude());
+                            latLong.setLongitude(ann.getLocation().getLongitude());
+                            annotationObject.setLatLong(latLong);
+                            annotationObjects.add(annotationObject);
+                        }
+                        annotationObjectList.setAnnotationObjectList(annotationObjects);
+                        nearbyAnnotationObjectsList.add(annotationObjectList);
                     }
 
                 }
-                AnnotationObjectList annotationObjectList = new AnnotationObjectList();
-                annotationObjectList.setAnnotationObjectList(annotations);
+
+
                 ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                String json = ow.writeValueAsString(annotationObjectList);
+                String json = ow.writeValueAsString(nearbyAnnotationObjectsList);
 
 
                 return json;

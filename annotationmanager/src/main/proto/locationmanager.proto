@@ -15,7 +15,6 @@ service LocationManager {
 
     rpc AddAnnotations(AddAnnotationsRequest) returns (AddAnnotationsResponse) {}
 
-
 }
 
 message Point {
@@ -37,8 +36,8 @@ message Annotation {
     string value = 4;
     // The point where the feature is detected.
     Point location = 5;
+    string timestamp = 6;
 }
-
 
 message AddAnnotationsRequest{
     repeated Annotation annotations = 1;
@@ -54,7 +53,11 @@ message GetAnnotationsRequest{
     double radius = 3;
 }
 
-message GetAnnotationsResponse{
+message NearbyAnnotations{
     repeated Annotation annotations = 1;
+    Point location = 2;
 }
 
+message GetAnnotationsResponse{
+    repeated NearbyAnnotations nearbyAnnotations = 1;
+}
